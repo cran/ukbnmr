@@ -402,7 +402,7 @@ remove the effects of technical variation on biomarker concentrations,
 and return a list containing the adjusted NMR biomarker data, biomarker
 QC flags, and sample quality control and processing information.</p>
 <p>This applies a multistep process as described in Ritchie <em>et
-al.</em> 2021:</p>
+al.</em> 2023:</p>
 <ol style="list-style-type: decimal">
 <li>First biomarker data is filtered to the 107 biomarkers that cannot
 be derived from any combination of other biomarkers.</li>
@@ -427,10 +427,10 @@ from their adjusted parts.</li>
 <li>An additional 76 biomarker ratios of potential biological
 significance are computed.</li>
 </ol>
-<p>Further details can be found in the preprint Ritchie S. C. <em>et
-al.</em>, Quality control and removal of technical variation of NMR
-metabolic biomarker data in ~120,000 UK Biobank participants,
-<strong>medRxiv</strong> (2021). doi: <a href="https://www.medrxiv.org/content/10.1101/2021.09.24.21264079v1">10.1101/2021.09.24.21264079</a>.</p>
+<p>Further details can be found in Ritchie S. C. <em>et al.</em>,
+Quality control and removal of technical variation of NMR metabolic
+biomarker data in ~120,000 UK Biobank participants, <strong>Sci
+Data</strong> <em>10</em> 64 (2023). doi: <a href="https://www.nature.com/articles/s41597-023-01949-y">10.1038/s41597-023-01949-y</a>.</p>
 <p>This function takes 10-15 minutes to run, and requires at least 16 GB
 of RAM, so you will want to save the output, rather than incorporate
 this function into your analysis scripts.</p>
@@ -472,8 +472,8 @@ two biomarkers are on different scales (e.g. regression residuals) after
 adjustment.</p>
 <p>If using these functions, please cite Ritchie S. C. <em>et al.</em>,
 Quality control and removal of technical variation of NMR metabolic
-biomarker data in ~120,000 UK Biobank participants,
-<strong>medRxiv</strong> (2021). doi: <a href="https://www.medrxiv.org/content/10.1101/2021.09.24.21264079v1">10.1101/2021.09.24.21264079</a>.</p>
+biomarker data in ~120,000 UK Biobank participants, <strong>Sci
+Data</strong> <em>10</em> 64 (2023). doi: <a href="https://www.nature.com/articles/s41597-023-01949-y">10.1038/s41597-023-01949-y</a>.</p>
 <p>An example workflow:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ukbnmr)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
