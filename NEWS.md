@@ -1,5 +1,92 @@
 # NEWS
 
+## Version 2.1.3
+
+ - Dramatically reduced test_data size in part due to unsuccessful attempts to 
+   address a CRAN NOTE. Test data has now been reduced to 10 rows as before, and
+   39 columns covering a subset of 8 biomarkers and 6 required sample processing
+   flags - this also makes example output easier to visually inspect.
+ 
+## Version 2.1.2
+
+ - CRAN NOTE resolved for remove_technical_variation() using solution below, but
+   similar NOTE was generated for other functions on submission of version 2.1.1
+   to CRAN. Work-around code has now been added to all user-facing functions.
+
+## Version 2.1.1
+
+ - Reverted test_data back to 50 row version after cutting down size did not
+   resolve the problematic CRAN NOTE (see version 2.1 below)
+   
+ - R-package-devel suggested CRAN NOTE issue may be due to misconfiguration of
+   CRAN's server making data.table use too many threads while running examples.
+   As a work around, remove_technical_variation() now explicitly sets the number
+   of threads data.table can use to 1 if it is running on ukbnmr::test_data 
+   (thanks to Ivan Krylov and Dirk Eddelbuettel if this does solve the issue) 
+   
+## Version 2.1
+
+ - Processing.Batch now inferred from Shipment.Plate if Processing.Batch missing
+   (UK Biobank field #20282) in input data and algorithm version 2 used in 
+   remove_technical_variation().
+
+ - Package overview help file is now correctly documented as requested by CRAN
+   following breaking changes in Roxygen 7.0.0 that changed the way this help 
+   file was internally tagged in the source code.
+   
+ - Reduced test_data from 50 to 10 rows to (hopefully) get around CRAN NOTE 
+   blocking publication on CRAN due to test code exceeding 5s on some very 
+   slow CRAN debian servers 
+
+## Version 2.0.1
+
+ - Reduced image filesizes to address CRAN NOTE
+
+## Version 2.0
+
+ - Added updated version of algorithm for removing technical variation, which has
+   been modified after exploration of the July 2023 release of the second tranche
+   of UK Biobank NMR data covering ~275,000 participants.  
+   
+ - Updated GitHub README and package vignette to provide details and justification
+   for the update algorithm
+   
+ - Added support for additional sample quality control field 20282 "Processing
+   batch from Nightingale Health data", which is used as part of the updated
+   algorithm for removing technical variation
+   
+ - Added support for new biomarker fields 20281 "Spectrometer-corrected alanine"
+   and 20280 "Glucose-lactate"
+
+## Version 1.5.3
+
+ - Added dependency to bit64 package to ensure the Shipment.Plate column is always
+   correctly interpreted by internal package functions.
+ 
+## Version 1.5.2
+
+ - Added support for new sample quality control field 20283 "Resolved plate swaps" 
+ 
+ - Returned data.tables now behave as expected with respect to printing contents:
+   i.e. running a function without storing the result will now show the contents
+   of the returned table, and typing the name of the variable storing the result
+   and hitting enter will show the contents on first try.
+   
+ - Fixed bug where columns corresponding to UK Biobank fields not available to
+   the user would be filled with NAs rather than missing from the returned 
+   results.
+ 
+## Version 1.5.1
+
+ - Fixed error in GitHub README example code, which has now been made consistent 
+   with the vignette.
+ 
+ - plate ID and timestamp columns in the package test data have now been set as 
+   character class instead of data.table specific representations of the 
+   integer64 class (from the bit64 package) and POSIXt to safeguard against 
+   intermittent errors arising from incorrect type conversion when running the
+   example code without first loading the data.table package.
+ 
 ## Version 1.5
 
  - Updated citations in documentation to reflect article publication in 

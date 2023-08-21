@@ -1,4 +1,6 @@
 Name,Description,UKB.Field.ID
+Processing.Batch,Processing batch from Nightingale Health data,20282
+Resolved.Plate.Swaps,Resolved plate swaps,20283
 Shipment.Plate,96-well plate samples were shipped on from UK Biobank,23649
 Spectrometer,Spectrometer the sample was measured on by Nightingale Health,23650
 Measurement.Quality.Flagged,Nightingale sample QC Flag indicating not enough material for sample measurement,23651

@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
 ## ----eval=FALSE---------------------------------------------------------------
 #  library(ukbnmr)
 #  
-#  decoded <- fread("path/to/decoded_ukbiobank_data.csv") # file save by ukbconv tool
+#  decoded <- fread("path/to/decoded_ukbiobank_data.csv") # file saved by ukbconv tool
 #  
 #  nmr <- extract_biomarkers(decoded)
 #  biomarker_qc_flags <- extract_biomarker_qc_flags(decoded)

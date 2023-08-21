@@ -67,7 +67,7 @@ process_data <- function(x, type) {
     qc_flag_fields <- na.omit(ukbnmr::nmr_info$QC.Flag.Field.ID)
     qc_flags_present <- field_ids[UKB.Field.ID %in% qc_flag_fields]
     empty_flags_with_biomarkers <- biomarkers_present[!(QC.Flag.Field.ID %in% qc_flags_present$UKB.Field.ID)]
-    field_ids <- rbind(qc_flags_present, empty_flags_with_biomarkers[,list(UKB.Field.ID=QC.Flag.Field.ID)])
+    field_ids <- rbind(qc_flags_present, empty_flags_with_biomarkers[,list(UKB.Field.ID=na.omit(QC.Flag.Field.ID))])
   } else if (type == "sample_qc_flags") {
     field_ids <- field_ids[UKB.Field.ID %in% na.omit(ukbnmr::sample_qc_info$UKB.Field.ID)]
   } else {
@@ -206,12 +206,18 @@ get_sample_qc_flag_values <- function(x) {
   # Silence CRAN NOTES about undefined global variables (columns in data.tables)
   Spectrometer <- Shipment.Plate <- High.Lactate <- High.Pyruvate <-
     Low.Glucose <- Low.Protein <- Measurement.Quality.Flagged <- integer_rep <-
-    flag <- NULL
+    flag <- Resolved.Plate.Swaps <- Processing.Batch <- NULL
 
-  tryAssign(x[, High.Lactate := ifelse(is.na(High.Lactate), NA_character_, "Yes")])
-  tryAssign(x[, High.Pyruvate := ifelse(is.na(High.Pyruvate), NA_character_, "Yes")])
-  tryAssign(x[, Low.Glucose := ifelse(is.na(Low.Glucose), NA_character_, "Yes")])
-  tryAssign(x[, Low.Protein := ifelse(is.na(Low.Protein), NA_character_, "Yes")])
+  if (exists("High.Lactate", where=x))
+    x[, High.Lactate := ifelse(is.na(High.Lactate), NA_character_, "Yes")]
+  if (exists("High.Pyruvate", where=x))
+    x[, High.Pyruvate := ifelse(is.na(High.Pyruvate), NA_character_, "Yes")]
+  if (exists("Low.Glucose", where=x))
+    x[, Low.Glucose := ifelse(is.na(Low.Glucose), NA_character_, "Yes")]
+  if (exists("Low.Protein", where=x))
+    x[, Low.Protein := ifelse(is.na(Low.Protein), NA_character_, "Yes")]
+  if (exists("Resolved.Plate.Swaps", where=x))
+    x[, Resolved.Plate.Swaps := ifelse(is.na(Resolved.Plate.Swaps), NA_character_, "Yes")]
 
   if ("Spectrometer" %in% names(x)) {
     if (is.integer(x$Spectrometer)) {
@@ -231,8 +237,17 @@ get_sample_qc_flag_values <- function(x) {
   }
 
   if ("Shipment.Plate" %in% names(x)) {
+    if (bit64::is.integer64(x$Shipment.Plate)) {
+      x[, Shipment.Plate := as.character(Shipment.Plate)]
+    }
     if (!is.character(x$Shipment.Plate) | !grepl("^Plate", stats::na.omit(x$Shipment.Plate)[1])) {
       x[, Shipment.Plate := ifelse(is.na(Shipment.Plate), NA_character_, paste("Plate", Shipment.Plate))]
+    }
+  }
+
+  if ("Processing.Batch" %in% names(x)) {
+    if (!is.character(x$Processing.Batch) | !grepl("^Plate", stats::na.omit(x$Processing.Batch)[1])) {
+      x[, Processing.Batch := ifelse(is.na(Processing.Batch), NA_character_, paste("Batch", Processing.Batch))]
     }
   }
 
