@@ -68,11 +68,11 @@
 #' releases when correcting for drift over time. Otherwise, spectrometers used
 #' in multiple data releases would have different bin sizes when adjusting
 #' different releases. A bin split is also hard coded on spectrometer 5 between
-#' plates 490000006726 and 490000006714 which correspond to a large change in
+#' plates 0490000006726 and 0490000006714 which correspond to a large change in
 #' concentrations akin to a spectrometer recalibration event most strongly
 #' observed for alanine concentrations.
 #'
-#' This function takes 10-15 minutes to run and requires at least 14 GB of RAM.
+#' This function takes 20-30 minutes to run and requires at least 14 GB of RAM.
 #'
 #' @return a \code{list} containing three \code{data.frames}: \describe{
 #'   \item{biomarkers}{A \code{data.frame} with column names "eid",
@@ -227,12 +227,12 @@ remove_technical_variation <- function(
   # to do this is by creating a dummy spectrometer column to split on, by giving the
   # spectrometer before and after the split a different name
   sinfo[, Spectrometer.Group := Spectrometer]
-  if (version == 2L && "490000006726" %in% sinfo[["Shipment.Plate"]]) {
+  if (version == 2L && "0490000006726" %in% sinfo[["Shipment.Plate"]]) {
     sinfo <- sinfo[order(Plate.Measured.Date)][order(Spectrometer)]
     sinfo[, Spectrometer.Group := as.character(Spectrometer.Group)]
-    spec_to_split <- sinfo[Shipment.Plate == "490000006726", Spectrometer.Group][1]
+    spec_to_split <- sinfo[Shipment.Plate == "0490000006726", Spectrometer.Group][1]
     sinfo[, row := .I]
-    idx_to_split <- sinfo[Shipment.Plate == "490000006726", max(row)]
+    idx_to_split <- sinfo[Shipment.Plate == "0490000006726", max(row)]
     sinfo[Spectrometer.Group == spec_to_split & row > idx_to_split,
           Spectrometer.Group := paste(Spectrometer.Group, "Group 2")]
     sinfo[, row := NULL]

@@ -439,7 +439,7 @@ additional technical variation present in the UK Biobank NMR data (see
 for details), returning a <code>list</code> containing the corrected NMR
 biomarker data, biomarker QC flags, and sample processing information in
 analysis-ready <code>data.frame</code>s.</p>
-<p>This function takes 10-15 minutes to run, and requires at least 16 GB
+<p>This function takes 20-30 minutes to run, and requires at least 16 GB
 of RAM, so you will want to save the output, rather than incorporate
 this function into your analysis scripts.</p>
 <p>An example workflow for using this function and saving the output for
@@ -571,8 +571,8 @@ batch</p></li>
 <li><p>Step 6 above is modified to:</p>
 <ol style="list-style-type: decimal">
 <li>group samples into bins of ~2,000 samples</li>
-<li>hard codes a bin split on spectrometer 5 between plates 490000006726
-and 490000006714</li>
+<li>hard codes a bin split on spectrometer 5 between plates
+0490000006726 and 0490000006714</li>
 </ol></li>
 </ul>
 <p>These changes have been made based on our exploration of the
@@ -643,9 +643,9 @@ on spectrometer 5 was not being appropriately account for.</li>
 <p>These issues were fixed as described above by setting a fixed bin
 size when correcting for drift over time, and hard-coding as a bin
 boundary the large change in concentrations observed on spectrometer 5
-between plates 490000006726 and 490000006714. The fixed bin size chosen
-was 2,000 samples, matching the median bin size when applying version 1
-of the algorithm to the phase 1 data release. This bin size is
+between plates 0490000006726 and 0490000006714. The fixed bin size
+chosen was 2,000 samples, matching the median bin size when applying
+version 1 of the algorithm to the phase 1 data release. This bin size is
 approximate, and differs between spectrometers. The number of bins each
 spectrometer is divided into is set as the total number of samples
 divided by 2,000. When allocating samples to bins, samples on the same
