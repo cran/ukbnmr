@@ -1,68 +1,79 @@
 #' Remove technical variation from NMR biomarker data in UK Biobank.
 #'
-#' @param x \code{data.frame} containing a dataset extracted by
-#' \href{https://biobank.ctsu.ox.ac.uk/crystal/exinfo.cgi?src=accessing_data_guide}{ukbconv}
-#' with \href{https://biobank.ndph.ox.ac.uk/showcase/label.cgi?id=220}{UK Biobank fields}
-#' containing the \href{https://research.nightingalehealth.com/biomarkers/}{Nightingale Health NMR metabolomics biomarker} data.
+#' @param x \code{data.frame} containing a tabular phenotype dataset extracted by the
+#' \href{https://dnanexus.gitbook.io/uk-biobank-rap/working-on-the-research-analysis-platform/accessing-data/accessing-phenotypic-data#create-a-tsv-or-csv-file-using-table-exporter}{Table Exporter} tool on the
+#' \href{https://ukbiobank.dnanexus.com/landing}{UK Biobank Research Analysis Platform}
+#' containing the project specific sample id (eid) and all fields (and instances)
+#' relating to the NMR metabolomics data (i.e. fields listed in showcase categories
+#' \href{https://biobank.ndph.ox.ac.uk/showcase/label.cgi?id=220}{220},
+#' \href{https://biobank.ndph.ox.ac.uk/showcase/label.cgi?id=221}{221}, and
+#' \href{https://biobank.ndph.ox.ac.uk/showcase/label.cgi?id=222}{222}.
 #' @param remove.outlier.plates logical, when set to \code{FALSE} biomarker
 #' concentrations on outlier shipment plates (see details) are not set to
 #' missing but simply flagged in the \code{biomarker_qc_flags} \code{data.frame}
 #' in the returned \code{list}.
 #' @param skip.biomarker.qc.flags logical, when set to \code{TRUE} biomarker QC
 #' flags are not processed or returned.
-#' @param version version of the QC algorithm to apply. Set to 1 to use the
-#' algorithm as described in Ritchie S. C. \emph{et al.} 2023. Defaults to 2, to
-#' run the updated algorithm modified after examining the phase 2 NMR biomarker
-#' data released by UK Biobank in July 2023 (see details).
+#' @param version version of the QC algorithm to apply. Defaults to 3, the latest
+#' version of the algorithm (see details).
 #'
 #' @details
-#' A multi-step procedure (version 1) is applied to the raw biomarker data to
-#' remove the effects of technical variation:
-#' \enumerate{
-#'   \item{First biomarker data is filtered to the 107 biomarkers that
-#'   cannot be derived from any combination of other biomarkers.}
-#'   \item{Absolute concentrations are log transformed, with a small offset
-#'   applied to biomarkers with concentrations of 0.}
-#'   \item{Each biomarker is adjusted for the time between sample preparation
-#'   and sample measurement (hours).}
-#'   \item{Each biomarker is adjusted for systematic differences between rows
-#'   (A-H) on the 96-well shipment plates.}
-#'   \item{Each biomarker is adjusted for remaining systematic differences
-#'   between columns (1-12) on the 96-well shipment plates.}
-#'   \item{Each biomarker is adjusted for drift over time within each of the six
-#'   spectrometers. To do so, samples are grouped into 10 bins, within each
-#'   spectrometer, by the date the majority of samples on their respective
-#'   96-well plates were measured.}
-#'   \item{Regression residuals after the sequential adjustments are
-#'   transformed back to absolute concentrations.}
-#'   \item{Samples belonging to shipment plates that are outliers of
-#'   non-biological origin are identified and set to missing.}
-#'   \item{The 61 composite biomarkers and 81 biomarker ratios are recomputed
-#'   from their adjusted parts.}
-#'   \item{An additional 76 biomarker ratios of potential biological
-#'   significance are computed.}
-#' }
+#' Three versions of the QC algorithm have been developed. Version 1 was designed
+#' based on the first phase of data released to the public covering ~120,000
+#' UK Biobank participants. Version 2 made several improvements to the algorithm
+#' based on the subsequent second public release of data covering an additional
+#' ~150,000 participants. Version 3, the default, makes some further minor tweaks
+#' primarily so that the algorithm is compatible with the full public data
+#' release covering all ~500,000 participants.
+#'
+#' Details on the impact of these algorithms on technical variation in the latest
+#' UK Biobank data are provided in the package vignette and on the github readme.
+#'
+#' ## Version 1
+#' Setting version to 1 applies the algorithm as exactly described in Ritchie S.
+#' C. *et al.* _Sci Data_ 2023. In brief, this multi-step procedure applies the
+#' following steps in sequence:
+#'
+#' 1. First biomarker data is filtered to the 107 biomarkers that cannot be
+#'    derived from any combination of other biomarkers.
+#' 2. Absolute concentrations are log transformed, with a small offset
+#'    applied to biomarkers with concentrations of 0.
+#' 3. Each biomarker is adjusted for the time between sample preparation
+#'    and sample measurement (hours).
+#' 4. Each biomarker is adjusted for systematic differences between rows
+#'    (A-H) on the 96-well shipment plates.
+#' 5. Each biomarker is adjusted for remaining systematic differences
+#'    between columns (1-12) on the 96-well shipment plates.
+#' 6. Each biomarker is adjusted for drift over time within each of the six
+#'    spectrometers. To do so, samples are grouped into 10 bins, within each
+#'    spectrometer, by the date the majority of samples on their respective
+#'    96-well plates were measured.
+#' 7. Regression residuals after the sequential adjustments are
+#'    transformed back to absolute concentrations.
+#' 8. Samples belonging to shipment plates that are outliers of
+#'    non-biological origin are identified and set to missing.
+#' 9. The 61 composite biomarkers and 81 biomarker ratios are recomputed
+#'    from their adjusted parts.
+#' 10. An additional 76 biomarker ratios of potential biological
+#'     significance are computed.
 #'
 #' At each step, adjustment for technical covariates is performed using
 #' \link[MASS:rlm]{robust linear regression}. Plate row, plate column, and
 #' sample measurement date bin are treated as factors, using the group with the
 #' largest sample size as reference in the regression.
 #'
-#' Further details can be found in Ritchie S. C. \emph{et al.} Quality control
-#' and removal of technical variation of NMR metabolic biomarker data in
-#' ~120,000 UK Biobank participants, \emph{Sci Data} \strong{10}, 64 (2023). doi:
-#' \href{https://www.nature.com/articles/s41597-023-01949-y}{10.1038/s41597-023-01949-y}
-#'
-#' Version 2 of the algorithm (the default) modifies the above procedure to (1)
+#' ## Version 2
+#' Version 2 of the algorithm modifies the above procedure to (1)
 #' adjust for well and column within each processing batch separately in steps 4
 #' and 5, and (2) in step 6 instead of splitting samples into 10 bins per
 #' spectrometer uses a fixed bin size of approximately 2,000 samples per bin,
 #' ensuring samples measured on the same plate and plates measured on the same
 #' day are grouped into the same bin.
 #'
-#' The first modification was made as applying version 1 of the algorithm
-#' revealed introduced stratification by well position when examining the
-#' corrected concentrations in each data release separately.
+#' The first modification was made as applying version 1 of the algorithm to the
+#' combined data from the first and second tranche of measurements revealed
+#' introduced stratification by well position when examining the corrected
+#' concentrations in each data release separately.
 #'
 #' The second modification was made to ensure consistent bin sizes across data
 #' releases when correcting for drift over time. Otherwise, spectrometers used
@@ -72,7 +83,19 @@
 #' concentrations akin to a spectrometer recalibration event most strongly
 #' observed for alanine concentrations.
 #'
-#' This function takes 20-30 minutes to run and requires at least 14 GB of RAM.
+#' ## Version 3
+#' Version 3 of the algorithm makes two further minor changes:
+#'
+#' 1. Imputation of missing sample preparation times has been improved. Previously,
+#'    any samples missing time of measurement (N=3 in the phase 2 public release)
+#'    had their time of measurement set to 00:00. In version 3, the time of measurement
+#'    is set to the median time of measurement for that spectrometer on that day,
+#'    which is between 12:00-13:00, instead of 00:00.
+#' 2. Underlying code for adjusting drift over time has been modified to accommodate
+#'    the phase 3 public release, which includes one spectrometer with ~2,500 samples.
+#'    Version 2 of the algorithm would split this into two bins, whereas version 3
+#'    keeps this as a single bin to better match the bin sizes of the rest of the
+#'    spectrometers.
 #'
 #' @return a \code{list} containing three \code{data.frames}: \describe{
 #'   \item{biomarkers}{A \code{data.frame} with column names "eid",
@@ -120,26 +143,29 @@
 #'         each biomarker. "Lower.Limit" and "Upper.Limit" give the values below
 #'         and above which plates are flagged as outliers based on their plate
 #'         median. See publication for more details.}
-#'   \item{algorithm_version}{Version of the algorithm run, currently either 1
-#'         or 2.}
+#'   \item{algorithm_version}{Version of the algorithm run, either 1, 2, or 3
+#'         (default).}
 #' }
 #'
 #' @examples
 #' ukb_data <- ukbnmr::test_data # Toy example dataset for testing package
 #' processed <- remove_technical_variation(ukb_data)
 #'
+#' @importFrom lubridate ymd_hms
+#' @importFrom lubridate ymd
 #' @importFrom stats coef
 #' @importFrom stats sd
 #' @importFrom stats qnorm
 #' @importFrom stats ppoints
 #' @importFrom stats median
 #' @importFrom MASS rlm
+#'
 #' @export
 remove_technical_variation <- function(
   x,
   remove.outlier.plates=TRUE,
   skip.biomarker.qc.flags=FALSE,
-  version=2L
+  version=3L
 ) {
   # Silence CRAN NOTES about undefined global variables (columns in data.tables)
   Well.Position.Within.Plate <- Well.Row <- Well.Column <- Sample.Measured.Date.and.Time <-
@@ -153,7 +179,9 @@ remove_technical_variation <- function(
     NULL
 
   # Check for valid algorithm version
-  if (version != 1L && version != 2L) stop("'version' must be 1 or 2")
+  if (version != 1L && version != 2L && version != 3L) stop("'version' must be 1, 2, or 3")
+
+  message("Checking for revelant UKB fields...")
 
   # Check relevant fields exist
   f1 <- detect_format(x, type="biomarkers")
@@ -175,12 +203,16 @@ remove_technical_variation <- function(
     on.exit({ setDTthreads(registered_threads) }) # re-register so no unintended side effects for users
   }
 
+  message("Extracting and pre-processing data...")
+
   # Extract biomarkers, biomarker QC flags, and sample processing information
   bio <- process_data(x, type="biomarkers")
   if (!skip.biomarker.qc.flags) {
     bio_qc <- process_data(x, type="biomarker_qc_flags")
   }
   sinfo <- process_data(x, type="sample_qc_flags")
+
+  message("Checking for required sample processing fields needed for QC procedure...")
 
   # Check required sample processing fields exist
   req <- c("Well.Position.Within.Plate", "Sample.Measured.Date.and.Time",
@@ -193,7 +225,7 @@ remove_technical_variation <- function(
     stop("Missing required sample processing fields: ", err_txt, ".")
   }
 
-  if (version == 2L && !("Processing.Batch" %in% names(sinfo))) {
+  if (version > 1L && !("Processing.Batch" %in% names(sinfo))) {
     warning("Processing.Batch missing (Field 20282), inferring from Shipment.Plate (Field 23649)")
     sinfo[plate_batch_map, on = list(Shipment.Plate), Processing.Batch := i.Processing.Batch]
     if (any(is.na(sinfo$Processing.Batch))) {
@@ -202,15 +234,28 @@ remove_technical_variation <- function(
     }
   }
 
+  message("Processing sample processing fields for QC procedure...")
+
   # Split out row and column information from 96-well plate information
   sinfo[, Well.Row := gsub("[0-9]", "", Well.Position.Within.Plate)]
   sinfo[, Well.Column := as.integer(gsub("[A-Z]", "", Well.Position.Within.Plate))]
 
   # Split out date and time for sample measurement and sample prep
-  sinfo[, Sample.Measured.Date := as.IDate(gsub(" .*$", "", Sample.Measured.Date.and.Time))]
-  sinfo[, Sample.Measured.Time := as.ITime(gsub("^.* ", "", Sample.Measured.Date.and.Time))]
-  sinfo[, Sample.Prepared.Date := as.IDate(gsub(" .*$", "", Sample.Prepared.Date.and.Time))]
-  sinfo[, Sample.Prepared.Time := as.ITime(gsub("^.* ", "", Sample.Prepared.Date.and.Time))]
+  sinfo[, c("Sample.Measured.Date", "Sample.Measured.Time") := IDateTime(harmonize_datetime(Sample.Measured.Date.and.Time))]
+  sinfo[, c("Sample.Prepared.Date", "Sample.Prepared.Time") := IDateTime(harmonize_datetime(Sample.Prepared.Date.and.Time))]
+
+  # Handle the handful of samples missing a sample measurement time. In the above
+  # these default to 00:00:00, instead, impute these to the median time of measurement
+  # for that spectrometer on that day
+  if (version == 3L) {
+    missing_time <- sinfo[, which(is.na(suppressWarnings(ymd_hms(Sample.Measured.Date.and.Time))))]
+    for (idx in missing_time) {
+      this_date <- sinfo[idx, Sample.Measured.Date]
+      this_spectrometer <- sinfo[idx, Spectrometer]
+      median_measure_time <- sinfo[Sample.Measured.Date == this_date & Spectrometer == this_spectrometer, median(Sample.Measured.Time)]
+      sinfo[idx, Sample.Measured.Time := median_measure_time]
+    }
+  }
 
   # Compute hours between sample prep and sample measurement
   sinfo[, Prep.to.Measure.Duration := duration_hours(
@@ -227,7 +272,7 @@ remove_technical_variation <- function(
   # to do this is by creating a dummy spectrometer column to split on, by giving the
   # spectrometer before and after the split a different name
   sinfo[, Spectrometer.Group := Spectrometer]
-  if (version == 2L && "0490000006726" %in% sinfo[["Shipment.Plate"]]) {
+  if (version > 1L && "0490000006726" %in% sinfo[["Shipment.Plate"]]) {
     sinfo <- sinfo[order(Plate.Measured.Date)][order(Spectrometer)]
     sinfo[, Spectrometer.Group := as.character(Spectrometer.Group)]
     spec_to_split <- sinfo[Shipment.Plate == "0490000006726", Spectrometer.Group][1]
@@ -260,12 +305,14 @@ remove_technical_variation <- function(
                         Well.Column, Spectrometer.Date.Bin, Spectrometer,
                         Spectrometer.Group, Shipment.Plate)][
                           bio, on = list(eid, visit_index), nomatch=0]
-  } else if (version == 2L) {
+  } else {
     bio <- sinfo[, list(eid, visit_index, Prep.to.Measure.Duration, Well.Row,
                         Well.Column, Spectrometer.Date.Bin, Spectrometer,
                         Spectrometer.Group, Processing.Batch, Shipment.Plate)][
                           bio, on = list(eid, visit_index), nomatch=0]
   }
+
+  message("Determining log offsets for biomarker concentrations...")
 
   # Determine offset for log transformation (required for variables with measurements == 0):
   # Acetate, Acetoacetate, Albumin, bOHbutyrate, Clinical_LDL_C, Gly, Ile, L_LDL_CE, L_LDL_FC, M_LDL_CE
@@ -275,25 +322,41 @@ remove_technical_variation <- function(
   # Get log transformed raw value
   bio[log_offset, on = list(Biomarker), log_value := log(value + Log.Offset)]
 
+  message("Adjusting for time between sample prep and sample measurement...")
+
   # Adjust for time between sample prep and sample measurement
   bio[, adj := MASS::rlm(log_value ~ log(Prep.to.Measure.Duration))$residuals, by=Biomarker]
+
+  message("Adjusting for within plate structure across 96-well plate rows A-H...")
 
   # Adjust for within plate structure across 96-well plate rows A-H
   if (version == 1L) {
     bio[, adj := MASS::rlm(adj ~ factor_by_size(Well.Row))$residuals, by=Biomarker]
-  } else if (version == 2L) {
+  } else {
     bio[, adj := MASS::rlm(adj ~ factor_by_size(Well.Row))$residuals, by=list(Processing.Batch, Biomarker)]
   }
+
+  message("Adjusting for within plate structure across 96-well plate columns 1-12...")
 
   # Adjust for within plate structure across 96-well plate columns 1-12
   if (version == 1L) {
     bio[, adj := MASS::rlm(adj ~ factor_by_size(Well.Column))$residuals, by=Biomarker]
-  } else if (version == 2L) {
+  } else {
     bio[, adj := MASS::rlm(adj ~ factor_by_size(Well.Column))$residuals, by=list(Processing.Batch, Biomarker)]
   }
 
-  # Adjust for drift over time within spectrometer
-  bio[, adj := MASS::rlm(adj ~ factor_by_size(Spectrometer.Date.Bin))$residuals, by=list(Biomarker, Spectrometer.Group)]
+  message("Adjusting for drift over time within spectrometer...")
+
+  if (version == 3L) {
+    # Adjust for drift over time within spectrometer (only applicable to spectrometers with > 1 bin)
+    to_adjust <- sinfo[, list(N=length(unique(Spectrometer.Date.Bin))), by=list(Spectrometer)]
+    to_adjust <- to_adjust[N > 1, Spectrometer]
+    bio[Spectrometer %in% to_adjust, adj := MASS::rlm(adj ~ factor_by_size(Spectrometer.Date.Bin))$residuals, by=list(Biomarker, Spectrometer.Group)]
+  } else {
+    bio[, adj := MASS::rlm(adj ~ factor_by_size(Spectrometer.Date.Bin))$residuals, by=list(Biomarker, Spectrometer.Group)]
+  }
+
+  message("Rescaling adjusted biomarkers to absolute concentrations...")
 
   # Rescale to absolute units. First, shift the residuals to have the same central
   # parameter estimate (e.g. mean, estimated via robust linear regression) as the
@@ -312,6 +375,8 @@ remove_technical_variation <- function(
   shift <- bio[, list(Right.Shift=-pmin(0, min(adj))), by=Biomarker]
   log_offset <- log_offset[shift, on = list(Biomarker)]
   bio[log_offset, on = list(Biomarker), adj := adj + Right.Shift]
+
+  message("Identifying outlier plates and setting their concentrations to NA...")
 
   # Identify and remove outlier plates.
   # Model plate medians as a normal distribution (across all 1,352 plates), then
@@ -334,6 +399,8 @@ remove_technical_variation <- function(
 
   # Add outlier plate tags to biomarker qc tags
   if (!skip.biomarker.qc.flags) {
+    message("Adding outlier plates to measurement QC tags...")
+
     bio_qc <- melt(bio_qc, id.vars=c("eid", "visit_index"), variable.name="Biomarker", na.rm=TRUE,
                    measure.vars=intersect(names(bio_qc), ukbnmr::nmr_info[Type == "Non-derived", Biomarker]))
 
@@ -356,12 +423,16 @@ remove_technical_variation <- function(
     bio_qc <- dcast(bio_qc, eid + visit_index ~ Biomarker, value.var="value")
   }
 
+  message("Recalculating derived biomarkers...")
+
   # Compute derived biomarkers and ratios
   bio <- nightingale_composite_biomarker_compute(bio)
   bio <- nightingale_ratio_compute(bio)
   bio <- extended_ratios_compute(bio)
 
   if (!skip.biomarker.qc.flags) {
+    message("Collating measurement QC tags for derived biomarkers...")
+
     bio_qc <- nightingale_composite_biomarker_flags(bio_qc)
     bio_qc <- nightingale_ratio_flags(bio_qc)
     bio_qc <- extended_ratios_flags(bio_qc)
@@ -372,6 +443,8 @@ remove_technical_variation <- function(
 
   # Remove dummy Spectrometer.Group column from returned output
   sinfo[, Spectrometer.Group := NULL]
+
+  message("Returning result...")
 
   # Return list
   if (!skip.biomarker.qc.flags) {

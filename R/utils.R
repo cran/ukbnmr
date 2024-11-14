@@ -101,5 +101,21 @@ bin_dates <- function(date, version) {
     bins <- cut(unique(date_order), n_bins, labels=FALSE)
     bin_map <- data.table(date=unique(date_order), bin=bins)
     return(bin_map[data.table(date=date_order), on=list(date), bin])
+  } else if (version == 3L) {
+    n_bins <- floor(length(date)/2000)
+    if (n_bins < 2) {
+      return(rep(1, length(date)))
+    } else {
+      bins <- cut(unique(date_order), n_bins, labels=FALSE)
+      bin_map <- data.table(date=unique(date_order), bin=bins)
+      return(bin_map[data.table(date=date_order), on=list(date), bin])
+    }
   }
+}
+
+# Harmonize various date time formats so they can be passed to IDateTime
+harmonize_datetime <- function(x) {
+  y <- suppressWarnings(ymd_hms(x))
+  y[is.na(y)] <- suppressWarnings(ymd(x[is.na(y)]))
+  y
 }
