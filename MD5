@@ -1,8 +1,8 @@
-f027c0e3a9f5dd2f02a41f57c017e38c *DESCRIPTION
+f8e2466d0cd1a03394c55bc0512e7c52 *DESCRIPTION
 e92549249d4ea27d731e211ebc26d707 *LICENSE
 64e9ad4aeadbabd25e45e0ce068df554 *NAMESPACE
-db068c91c2abc701660c8a29ece8def9 *NEWS.md
-d52e1b2a6997ff0989d72193caab0dd9 *R/biomarker_qc.R
+a20624e91a9c56ab4bd318ae3fc2968a *NEWS.md
+c0d1cb06b6345f10bb0e1b131d9703c4 *R/biomarker_qc.R
 493666b741eaafac107f55d1ab8854b0 *R/compute_biomarkers_internal.R
 2bb6880d1dd2b3f0e66d1066925eee97 *R/compute_biomarkers_user.R
 1fc368f24c61d76b8bb9bb8cab020cd0 *R/compute_qc_flags_internal.R
@@ -33,7 +33,7 @@ b48c9f2a9b8a5a8421078d473e8aacbd *man/extract_sample_qc_flags.Rd
 1bdbfeee82e2b1dae83342b1cff72e5a *man/nmr_info.Rd
 fe8594000a7351b0849bb907dafb4e20 *man/recompute_derived_biomarker_qc_flags.Rd
 d5ce7275422db003ab10c4cc3cb1c55d *man/recompute_derived_biomarkers.Rd
-c822d6d1e7c35770651d00cc04aacc92 *man/remove_technical_variation.Rd
+0147acb5a948b992c98a6969a82932d7 *man/remove_technical_variation.Rd
 3e5c4a5c6077e5b13eab09fb368ece4c *man/sample_qc_info.Rd
 0cd645e8a8817ee5e983ea82e2374eb6 *man/test_data.Rd
 c2d35dcc7073c9d4467110efe11ed358 *man/ukbnmr.Rd
