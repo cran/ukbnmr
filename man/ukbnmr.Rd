@@ -113,7 +113,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Scott C Ritchie \email{sritchie73@gmail.com} (0000-0002-8454-9548)
+\strong{Maintainer}: Scott C Ritchie \email{sritchie73@gmail.com} (\href{https://orcid.org/0000-0002-8454-9548}{ORCID})
 
 }
 \keyword{package}
