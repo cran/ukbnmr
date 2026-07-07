@@ -2,7 +2,7 @@ Package: ukbnmr
 Type: Package
 Title: Removal of Unwanted Technical Variation from UK Biobank NMR
         Metabolomics Biomarker Data
-Version: 3.3.2
+Version: 3.4
 Authors@R: 
     person(given=c("Scott", "C"), family="Ritchie", email="sritchie73@gmail.com", 
            role=c("aut", "cre"), comment=c(ORCID="0000-0002-8454-9548"))
@@ -22,13 +22,13 @@ LazyData: true
 Depends: R (>= 2.10)
 Imports: data.table, bit64, lubridate, MASS
 Suggests: knitr, rmarkdown
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Config/Needs/development: roxygen2
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-04-12 10:11:01 UTC; sr827
+Packaged: 2026-07-07 10:55:03 UTC; sr827
 Author: Scott C Ritchie [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-8454-9548>)
 Maintainer: Scott C Ritchie <sritchie73@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-04-12 10:20:02 UTC
+Date/Publication: 2026-07-07 11:10:02 UTC
